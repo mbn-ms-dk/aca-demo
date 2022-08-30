@@ -1,4 +1,4 @@
-Microservices with Dapr using the CLI
+Microservices with Dapr 
 =====================================
 
 Prerequisites
@@ -8,13 +8,16 @@ Prerequisites
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 * [k6](https://k6.io/docs/getting-started/installation/) for generating orders
 
+Architecture
+--------------------
+![](/node-python/img/Architecture_Diagram.png)
 Setup base resources
 --------------------
 
 ```sh
-RESOURCE_GROUP="containerapps"
-LOCATION="canadacentral"
-CONTAINERAPPS_ENVIRONMENT="containerapps"
+RESOURCE_GROUP="rg-nodepython"
+LOCATION="northeurope"
+CONTAINERAPPS_ENVIRONMENT="envnodepython"
 
 az login
 
@@ -33,9 +36,9 @@ az deployment group create \
   --parameters environmentName=$CONTAINERAPPS_ENVIRONMENT
 
 az containerapp env list -o table
-az containerapp env show -n containerapps -g containerapps
-az containerapp env dapr-component list -n containerapps -g containerapps -o table
-az containerapp env dapr-component show -n containerapps -g containerapps --dapr-component-name statestore
+az containerapp env show -n $CONTAINERAPPS_ENVIRONMENT -g $RESOURCE_GROUP
+az containerapp env dapr-component list -n $CONTAINERAPPS_ENVIRONMENT -g $RESOURCE_GROUP -o table
+az containerapp env dapr-component show -n $CONTAINERAPPS_ENVIRONMENT -g $RESOURCE_GROUP --dapr-component-name statestore
 
 DEPLOY_OUTPUTS=$(az deployment group show --name env-create -g $RESOURCE_GROUP --query properties.outputs)
 
@@ -50,21 +53,20 @@ Create new container images (for displaying a custom message with the the app ve
 --------------------------------------------------------------------------------------
 
 ```sh
-pushd ~
 
 cd containers/node
 
-az acr build --image hello-k8s-node:v1 \
+az acr build --image hello-aca-node:v1 \
   --registry $ACR_NAME \
   --file Dockerfile .
 
 cd ../python
 
-az acr build --image hello-k8s-python:v1 \
+az acr build --image hello-aca-python:v1 \
   --registry $ACR_NAME \
   --file Dockerfile .
 
-popd
+
 ```
 
 Deploy the service application (HTTP web server)
@@ -78,7 +80,7 @@ az deployment group create \
   --template-file ./nodeapp-containerapp.bicep \
   --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
     custom_message="v1" \
-    image_name="$ACR_LOGIN_SERVER/hello-k8s-node:v1" \
+    image_name="$ACR_LOGIN_SERVER/hello-aca-node:v1" \
     registry_login_server=$ACR_LOGIN_SERVER \
     registry_username=$ACR_USERNAME \
     registry_password=$ACR_PASSWORD
@@ -90,7 +92,7 @@ az containerapp create \
   --revisions-mode multiple \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
-  --image $ACR_LOGIN_SERVER/hello-k8s-node:v1 \
+  --image $ACR_LOGIN_SERVER/hello-aca-node:v1 \
   --registry-server $ACR_LOGIN_SERVER \
   --registry-username $ACR_USERNAME \
   --registry-password $ACR_PASSWORD \
@@ -124,7 +126,7 @@ az deployment group create \
   -g $RESOURCE_GROUP \
   --template-file ./pythonapp-containerapp.bicep \
   --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
-    image_name="$ACR_LOGIN_SERVER/hello-k8s-python:v1" \
+    image_name="$ACR_LOGIN_SERVER/hello-aca-python:v1" \
     registry_login_server=$ACR_LOGIN_SERVER \
     registry_username=$ACR_USERNAME \
     registry_password=$ACR_PASSWORD
@@ -135,7 +137,7 @@ az containerapp create \
   --container-name pythonapp \
   --resource-group $RESOURCE_GROUP \
   --environment $CONTAINERAPPS_ENVIRONMENT \
-  --image $ACR_LOGIN_SERVER/hello-k8s-node:v1 \
+  --image $ACR_LOGIN_SERVER/hello-aca-node:v1 \
   --registry-server $ACR_LOGIN_SERVER \
   --registry-username $ACR_USERNAME \
   --registry-password $ACR_PASSWORD \
@@ -193,7 +195,7 @@ az deployment group create \
   --template-file ./nodeapp-containerapp.bicep \
   --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
     custom_message="v2" \
-    image_name="$ACR_LOGIN_SERVER/hello-k8s-node:v1" \
+    image_name="$ACR_LOGIN_SERVER/hello-aca-node:v1" \
     registry_login_server=$ACR_LOGIN_SERVER \
     registry_username=$ACR_USERNAME \
     registry_password=$ACR_PASSWORD
@@ -203,7 +205,7 @@ az containerapp update \
   --name nodeapp \
   --container-name nodeapp \
   --resource-group $RESOURCE_GROUP \
-  --image $ACR_LOGIN_SERVER/hello-k8s-node:v1 \
+  --image $ACR_LOGIN_SERVER/hello-aca-node:v1 \
   --replace-env-vars MESSAGE=v2 \
   --min-replicas 1 \
   --max-replicas 1
