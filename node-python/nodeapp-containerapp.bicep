@@ -58,7 +58,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
     }
 
     template: {
-      revisionSuffix: 'rev1'
+      revisionSuffix: 'rev2'
       containers: [
         {
           image: image_name
