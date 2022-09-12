@@ -55,12 +55,12 @@ Let's start by setting some variables that we will use for creating Azure resour
 name=ca$(cat /dev/urandom | tr -dc '[:lower:]' | fold -w ${1:-5} | head -n 1)
 
 # Set variables for the rest of the demo
-resourceGroup=${name}-rg
+resourceGroup=rg-aca-${name}
 location=northeurope
-containerAppEnv=${name}-env
-logAnalytics=${name}-la
-appInsights=${name}-ai
-acr=${name}acr
+containerAppEnv=env-${name}
+logAnalytics=la-${name}
+appInsights=ai-${name}
+acr=acr${name}
 ```
 
 Optional -  if using Codespaces or not logged into Azure CLI
@@ -127,7 +127,7 @@ The response you should see is `[]` which means no data was returned. Either the
 Try adding a new order to the order data API and verify that it is stored correctly. First grab the order data API URL using a similar approach as in previous step.
 
 ```bash
-dataURL=https://httpapi.$(az containerapp env show -g $resourceGroup -n ${name}-env --query 'properties.defaultDomain' -o tsv)/Data
+dataURL=https://httpapi.$(az containerapp env show -g $resourceGroup -n $containerAppEnv --query 'properties.defaultDomain' -o tsv)/Data
 ```
 Add a new order test item using a HTTP Post
 
@@ -381,7 +381,7 @@ Now let's see scaling in action. To do this, we will generate a large amount of 
 > [Optional] While the scaling script is running, you can also have this operations dashboard open to visually see the messages flowing through queue into the store
 
 > ```bash
-> dashboardURL=https://dashboardapp.$(az containerapp env show -g $resourceGroup -n ${name}-env --query 'properties.defaultDomain' -o tsv)
+> dashboardURL=https://dashboardapp.$(az containerapp env show -g $resourceGroup -n $containerAppEnv --query 'properties.defaultDomain' -o tsv)
 > echo 'Open the URL in your browser of choice:' $dashboardURL
 > ```
 
