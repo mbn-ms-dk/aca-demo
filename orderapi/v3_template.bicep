@@ -3,7 +3,6 @@ param StorageAccount_prefix string
 param LogAnalytics_Workspace_Name string
 param AppInsights_Name string
 param ContainerApps_Environment_Name string
-param ContainerApps_HttpApi_CurrentRevisionName string
 param ContainerApps_HttpApi_NewRevisionName string
 
 var StorageAccount_ApiVersion = '2018-07-01'
@@ -16,7 +15,6 @@ resource StorageAccount_Name_resource 'Microsoft.Storage/storageAccounts@2021-01
   location: Location
   sku: {
     name: 'Standard_LRS'
-    tier: 'Standard'
   }
   kind: 'StorageV2'
   properties: {
@@ -54,8 +52,8 @@ resource LogAnalytics_Workspace_Name_resource 'Microsoft.OperationalInsights/wor
 resource AppInsights_Name_resource 'Microsoft.Insights/components@2020-02-02' = {
   name: AppInsights_Name
   location: Location
-  properties: {
-    ApplicationId: AppInsights_Name
+  kind: AppInsights_Name
+  properties: {     
     Application_Type: 'web'
     Flow_Type: 'Redfield'
     Request_Source: 'CustomDeployment'
