@@ -13,6 +13,7 @@ param registry_login_server string
 @description('Private container registry username')
 param registry_username string
 
+@secure()
 @description('Private container registry password')
 param registry_password string
 

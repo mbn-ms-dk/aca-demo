@@ -83,7 +83,8 @@ app.post('/neworder', (req, res) => {
 app.get('/ports', (_req, res) => {
     console.log("DAPR_HTTP_PORT: " + daprPort);
     console.log("DAPR_GRPC_PORT: " + daprGRPCPort);
-    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort })
+    console.log("Version: " + message);
+    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort, Version: message })
 });
 
 app.listen(port, () => console.log(`Node App listening on port ${port}!`));
