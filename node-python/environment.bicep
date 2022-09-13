@@ -7,8 +7,8 @@ param location string = resourceGroup().location
 var suffix = take(uniqueString(resourceGroup().id, environmentName), 5)
 var logAnalyticsWorkspaceName = 'logs-${environmentName}'
 var appInsightsName = 'appins-${environmentName}'
-var acrName = '${environmentName}${suffix}'
-var storageAccountName = '${environmentName}${suffix}'
+var acrName = 'acr${suffix}'
+var storageAccountName = 'storage${suffix}'
 var storageContainerName = 'orders'
 
 resource acr 'Microsoft.ContainerRegistry/registries@2021-08-01-preview' = {
