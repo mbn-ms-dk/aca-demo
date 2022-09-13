@@ -77,7 +77,7 @@ Deploy the service application (HTTP web server)
 az deployment group create \
   --name nodeapp-v1 \
   -g $RESOURCE_GROUP \
-  --template-file ./nodeapp-containerapp.bicep \
+  --template-file ./nodeapp-containerappv1.bicep \
   --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
     custom_message="v1" \
     image_name="$ACR_LOGIN_SERVER/hello-aca-node:v1" \
@@ -192,7 +192,7 @@ Deploy v2 of nodeapp
 az deployment group create \
   --name nodeapp-v1 \
   -g $RESOURCE_GROUP \
-  --template-file ./nodeapp-containerapp.bicep \
+  --template-file ./nodeapp-containerappv2.bicep \
   --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
     custom_message="v2" \
     image_name="$ACR_LOGIN_SERVER/hello-aca-node:v1" \
