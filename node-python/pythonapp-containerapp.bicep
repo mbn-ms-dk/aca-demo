@@ -55,6 +55,46 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
         {
           image: image_name
           name: 'pythonapp'
+          probes: [
+            {
+              type: 'Liveness'
+              httpGet: {
+                  path: '/health'
+                  port: 8080
+                  httpHeaders: [
+                    {
+                      name:'Custom-Header'
+                      value: 'liveness probe'
+                    }
+                  ]
+                }
+                initialDelaySeconds: 7
+                periodSeconds: 3
+            }
+            {
+              type: 'Readiness'
+              tcpSocket: {
+                port: 8081
+              }
+              initialDelaySeconds: 10
+              periodSeconds: 3
+            }
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/startup'
+                port: 8080
+                httpHeaders: [
+                  {
+                    name:'Custom-Header'
+                    value: 'startup probe'
+                  }                
+                ]
+              }
+              initialDelaySeconds: 3
+              periodSeconds: 3
+            }
+          ]
           env: [
             {
               name: 'NODEAPP_URL'
