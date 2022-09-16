@@ -1,15 +1,19 @@
+@secure()
 @description('Container apps environment name')
 param environment_name string
 
 @description('Custom message for the app')
 param custom_message string = 'nodeapp'
 
-@description('Container image name (registry/image:tag)')
-param image_name string
 
+//@description('Container image name (registry/image:tag)')
+//param image_name string
+
+@secure()
 @description('Private container registry login server')
 param registry_login_server string
 
+@secure()
 @description('Private container registry username')
 param registry_username string
 
@@ -18,7 +22,7 @@ param registry_username string
 param registry_password string
 
 @description('Provide a location for the Container Apps resources')
-param location string = resourceGroup().location
+param location string
 
 resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
   name: 'nodeapp'
@@ -62,7 +66,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
       revisionSuffix: 'rev1'
       containers: [
         {
-          image: image_name
+          image: '${registry_login_server}/hello-aca-node:v1'
           name: 'nodeapp'
           probes: [
             {
