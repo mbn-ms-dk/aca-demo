@@ -10,6 +10,8 @@ var appInsightsName = 'appins-${environmentName}'
 var acrName = 'acr${suffix}'
 var storageAccountName = 'storage${suffix}'
 var storageContainerName = 'orders'
+var keyvaultName = 'kv${suffix}'
+var tenantId = subscription().tenantId
 
 resource acr 'Microsoft.ContainerRegistry/registries@2021-08-01-preview' = {
   name: acrName
@@ -103,17 +105,94 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   }
 }
 
-@description('Container Apps Environment ID')
-output environmentId string = environment.id
+resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: keyvaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+  tenantId: subscription().tenantId
+  enableRbacAuthorization: false //Using Access Policies
+  accessPolicies: [
+    {
+      objectId: 'd89101d9-cf97-4b6c-9656-c6da457d8add'
+      tenantId: tenantId
+      permissions: {
+        secrets: [
+          'all'
+        ]
+        certificates: [
+          'all'
+        ]
+        keys: [
+          'all'
+        ]
+      }
+    }
+  ]
+  enabledForDeployment: false //No VM need to retieve certificates
+  enabledForTemplateDeployment: true //ARM can retrieve values
+  enablePurgeProtection: true
+  enableSoftDelete: true
+  softDeleteRetentionInDays: 3
+  createMode: 'default' // Creating or updating the key vault (not recovering)
+  }
+}
 
-@description('Log Analytics workspace ID')
-output workspaceId string = logAnalyticsWorkspace.properties.customerId
+// Container Apps Environment ID
+resource kvEndId 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvEnvId'
+  parent: keyvault
+  properties: {
+    value: environment.id
+  }
+}  
+// @description('Container Apps Environment ID')
+//output environmentId string = environment.id
 
-@description('Container Registry admin username')
-output acrUserName string = acr.listCredentials().username
 
-@description('Container Registry admin password')
-output acrPassword string = acr.listCredentials().passwords[0].value
+// Log Analytics workspace ID
+resource kvLaId 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvLaId'
+  parent: keyvault
+  properties: {
+    value: logAnalyticsWorkspace.properties.customerId
+  }
+}  
+// @description('Log Analytics workspace ID')
+// output workspaceId string = logAnalyticsWorkspace.properties.customerId
 
-@description('Container Registry login server')
-output acrloginServer string = acr.properties.loginServer
+// Container Registry admin username
+resource kvAcrUserName  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvAcrUserName'
+  parent: keyvault
+  properties: {
+    value: acr.listCredentials().username
+  }
+}
+
+// @description('Container Registry admin username')
+// output acrUserName string = acr.listCredentials().username
+
+// Container Registry admin password
+resource kvAcrPassword  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvAcrPassword'
+  parent: keyvault
+  properties: {
+    value: acr.listCredentials().passwords[0].value
+  }
+}
+// @description('Container Registry admin password')
+// output acrPassword string = acr.listCredentials().passwords[0].value
+
+resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvAcrloginServer'
+  parent: keyvault
+  properties: {
+    value: acr.properties.loginServer
+  }
+}
+// @description('Container Registry login server')
+// output acrloginServer string = acr.properties.loginServer
