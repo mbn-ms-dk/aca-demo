@@ -114,7 +114,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       name: 'standard'
     }
   tenantId: subscription().tenantId
-  enableRbacAuthorization: false //Using Access Policies
+  enableRbacAuthorization: true //Using Access Policies
   accessPolicies: [
     {
       objectId: 'd89101d9-cf97-4b6c-9656-c6da457d8add'
@@ -137,18 +137,26 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   enablePurgeProtection: true
   enableSoftDelete: true
   softDeleteRetentionInDays: 7
-  createMode: 'default' // Creating or updating the key vault (not recovering)
+  createMode: 'recover' // Creating or updating the key vault (not recovering)
   }
 }
 
 // Container Apps Environment ID
-resource kvEndId 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource kvEnvId 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'kvEnvId'
   parent: keyvault
   properties: {
     value: environment.id
   }
-}  
+}
+
+resource kvEnvName 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'kvEnvName'
+  parent: keyvault
+  properties: {
+    value: environment.name
+  }
+}
 // @description('Container Apps Environment ID')
 //output environmentId string = environment.id
 
