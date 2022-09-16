@@ -4,6 +4,7 @@ param environmentName string
 @description('Provide a location for the Container Apps resources')
 param location string = resourceGroup().location
 
+// unique suffix
 var suffix = take(uniqueString(resourceGroup().id, environmentName), 5)
 var logAnalyticsWorkspaceName = 'logs-${environmentName}'
 var appInsightsName = 'appins-${environmentName}'
