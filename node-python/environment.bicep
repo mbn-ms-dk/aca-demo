@@ -136,7 +136,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   enabledForTemplateDeployment: true //ARM can retrieve values
   enablePurgeProtection: true
   enableSoftDelete: true
-  softDeleteRetentionInDays: 3
+  softDeleteRetentionInDays: 7
   createMode: 'default' // Creating or updating the key vault (not recovering)
   }
 }
