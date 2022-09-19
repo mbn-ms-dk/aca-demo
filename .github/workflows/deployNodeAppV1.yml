@@ -1,5 +1,7 @@
 # Deploy Node App v1 Bicep
 on: [push]
+paths:
+      - 'deployNodeAppV1.yml'
 name: Build and deploy NodeApp V1
 jobs:
   build-and-deploy:

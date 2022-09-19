@@ -68,31 +68,6 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
         {
           image: '${registry_login_server}/hello-aca-node:v1'
           name: 'nodeapp'
-          probes: [
-            {
-              type: 'Liveness'
-              httpGet: {
-                  path: '/health'
-                  port: 8080
-                  httpHeaders: [
-                    {
-                      name:'Custom-Header'
-                      value: 'liveness probe'
-                    }
-                  ]
-                }
-                initialDelaySeconds: 7
-                periodSeconds: 3
-            }
-            {
-              type: 'Readiness'
-              tcpSocket: {
-                port: 8081
-              }
-              initialDelaySeconds: 10
-              periodSeconds: 3
-            }
-          ]
           env: [
             {
               name: 'MESSAGE'
