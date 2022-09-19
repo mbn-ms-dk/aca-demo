@@ -88,21 +88,6 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
               initialDelaySeconds: 10
               periodSeconds: 3
             }
-            {
-              type: 'Startup'
-              httpGet: {
-                path: '/startup'
-                port: 8080
-                httpHeaders: [
-                  {
-                    name:'Custom-Header'
-                    value: 'startup probe'
-                  }                
-                ]
-              }
-              initialDelaySeconds: 3
-              periodSeconds: 3
-            }
           ]
           env: [
             {
