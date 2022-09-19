@@ -1,7 +1,7 @@
 # Deploy Environment Bicep
 on: [push]
 paths:
-      - 'deployEnvBicep.yml
+  - 'deployEnvBicep.yml
 name: Build and deploy Environment
 jobs:
   build-and-deploy:
