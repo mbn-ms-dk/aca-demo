@@ -1,17 +1,23 @@
 @description('Keyvault name')
 param kvName string 
+@description('Location')
+param location string
+@description('Version')
+param nodeAppVersion string
 
 resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: kvName
   scope: resourceGroup()
 }
 
-module nodeappModule 'nodeapp-containerappv1.bicep' = {
-  name: 'deployNodeApp'
+
+module nodeappModule1 'nodeapp-containerapp.bicep' =  {
+  name: 'deployNodeAppv1'
   params: {
-    location: resourceGroup().location
+    location: location
     environment_name: keyvault.getSecret('kvEnvName')
-    custom_message: 'v1'
+    custom_message: 'Version:v${nodeAppVersion}'
+    revVersion: 'v${nodeAppVersion}'
     registry_login_server: keyvault.getSecret('kvAcrloginServer')
     registry_password: keyvault.getSecret('kvAcrPassword')
     registry_username: keyvault.getSecret('kvAcrUserName')

@@ -138,7 +138,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   enablePurgeProtection: true
   enableSoftDelete: true
   softDeleteRetentionInDays: 7
-  createMode: 'recover' // Creating or updating the key vault (not recovering)
+  createMode: 'default' // Creating or updating the key vault (not recovering)
   }
 }
 
