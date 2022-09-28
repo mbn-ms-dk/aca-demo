@@ -127,7 +127,7 @@ The response you should see is `[]` which means no data was returned. Either the
 Try adding a new order to the order data API and verify that it is stored correctly. First grab the order data API URL using a similar approach as in previous step.
 
 ```bash
-dataURL=https://httpapi.$(az containerapp env show -g $resourceGroup -n $containerAppEnv --query 'properties.defaultDomain' -o tsv)/Data
+    dataURL=https://httpapi.$(az containerapp env show -g $resourceGroup -n $containerAppEnv --query 'properties.defaultDomain' -o tsv)/Data
 ```
 Add a new order test item using a HTTP Post
 
