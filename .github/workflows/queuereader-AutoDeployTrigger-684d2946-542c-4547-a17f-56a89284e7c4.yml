@@ -36,7 +36,7 @@ jobs:
         with:
           push: true
           tags: acrcachesw.azurecr.io/queuereader:${{ github.sha }}
-          file: ./queuereaderapp/Dockerfile
+          file: ./orderapi/queuereaderapp/Dockerfile
           context: ./queuereaderapp/
 
 
