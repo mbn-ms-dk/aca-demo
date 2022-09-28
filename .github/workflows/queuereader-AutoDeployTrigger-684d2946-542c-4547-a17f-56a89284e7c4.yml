@@ -7,7 +7,7 @@ on:
     branches: 
       [ main ]
     paths:
-    - 'queuereaderapp/**'
+    - 'orderapi/queuereaderapp/**'
     - '.github/workflows/queuereader-AutoDeployTrigger-684d2946-542c-4547-a17f-56a89284e7c4.yml'
 
   # Allow mannually trigger 
