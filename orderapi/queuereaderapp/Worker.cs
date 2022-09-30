@@ -49,7 +49,7 @@ namespace QueueWorker
                         }
 
                         logger.LogInformation($"Message ID: '{message.MessageId}', contents: '{message.Body?.ToString()}'");
-                        logger.LogInformation("SDC Demo :)");
+                        logger.LogInformation("Demo");
                         
                         
 
