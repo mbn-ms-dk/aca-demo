@@ -18,10 +18,10 @@
             "value": "khcaenv001"
         },
         "ContainerApps_HttpApi_CurrentRevisionName": {
-            "value": "green"
+            "value": "orange"
         },
         "ContainerApps_HttpApi_NewRevisionName": {
-            "value": "orange"
+            "value": "green"
         }
     }
 }
