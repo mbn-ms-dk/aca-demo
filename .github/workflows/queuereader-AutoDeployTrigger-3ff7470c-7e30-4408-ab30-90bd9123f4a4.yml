@@ -7,7 +7,7 @@ on:
     branches: 
       [ main ]
     paths:
-    - 'queuereaderapp/**'
+    - 'orderapi/queuereaderapp/**'
     - '.github/workflows/queuereader-AutoDeployTrigger-3ff7470c-7e30-4408-ab30-90bd9123f4a4.yml'
 
   # Allow mannually trigger 
@@ -36,8 +36,8 @@ jobs:
         with:
           push: true
           tags: acrcasxftp.azurecr.io/queuereader:${{ github.sha }}
-          file: ./queuereaderapp/Dockerfile
-          context: ./queuereaderapp/
+          file: ./orderapi/queuereaderapp/Dockerfile
+          context: ./orderapi/queuereaderapp/
 
 
   deploy:
