@@ -1,12 +1,12 @@
+@secure()
 @description('Container apps environment name')
 param environment_name string
 
-@description('Container image name (registry/image:tag)')
-param image_name string
-
+@secure()
 @description('Private container registry login server')
 param registry_login_server string
 
+@secure()
 @description('Private container registry username')
 param registry_username string
 
@@ -53,7 +53,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
     template: {
       containers: [
         {
-          image: image_name
+          image: '${registry_login_server}/hello-aca-python:v1'
           name: 'pythonapp'
           env: [
             {

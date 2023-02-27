@@ -78,7 +78,7 @@ az deployment group create \
   --name nodeapp-v1 \
   -g $RESOURCE_GROUP \
   --template-file ./deployNodeApp.bicep \
-  --parameters kvName=kvoau3y \
+  --parameters kvName=<Keyvault_name> \
     location=westeurope \ 
     nodeAppVersion='1'
 
@@ -119,14 +119,11 @@ NODEAPP_INGRESS_URL="https://$(az containerapp show -n nodeapp -g $RESOURCE_GROU
 
 # Deploy via Bicep template
 az deployment group create \
-  --name pythonapp \
+  --name pythonapp-v1 \
   -g $RESOURCE_GROUP \
-  --template-file ./pythonapp-containerapp.bicep \
-  --parameters environment_name=$CONTAINERAPPS_ENVIRONMENT \
-    image_name="$ACR_LOGIN_SERVER/hello-aca-python:v1" \
-    registry_login_server=$ACR_LOGIN_SERVER \
-    registry_username=$ACR_USERNAME \
-    registry_password=$ACR_PASSWORD
+  --template-file ./deployPythonApp.bicep \
+  --parameters kvName=<Keyvault_name> \
+    location=westeurope 
 
 # Or via CLI
 az containerapp create \
