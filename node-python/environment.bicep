@@ -159,7 +159,7 @@ resource kvEnvName 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 // @description('Container Apps Environment ID')
-//output environmentId string = environment.id
+output environmentId string = environment.id
 
 
 // Log Analytics workspace ID
@@ -183,7 +183,7 @@ resource kvAcrUserName  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 }
 
 // @description('Container Registry admin username')
-// output acrUserName string = acr.listCredentials().username
+output acrUserName string = acr.listCredentials().username
 
 // Container Registry admin password
 resource kvAcrPassword  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
@@ -194,7 +194,7 @@ resource kvAcrPassword  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 // @description('Container Registry admin password')
-// output acrPassword string = acr.listCredentials().passwords[0].value
+output acrPassword string = acr.listCredentials().passwords[0].value
 
 resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'kvAcrloginServer'
@@ -204,4 +204,4 @@ resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 // @description('Container Registry login server')
-// output acrloginServer string = acr.properties.loginServer
+output acrloginServer string = acr.properties.loginServer
