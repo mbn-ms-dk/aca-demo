@@ -14,6 +14,7 @@ var storageContainerName = 'orders'
 var keyvaultName = 'kv${suffix}'
 var tenantId = subscription().tenantId
 
+//Create ACR
 resource acr 'Microsoft.ContainerRegistry/registries@2021-08-01-preview' = {
   name: acrName
   location: location
@@ -25,6 +26,20 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-08-01-preview' = {
   }
 }
 
+@description('ACR Name')
+output acrname string = acr.name
+
+//Create identity
+module stgIdentity 'modules/userassigned.bicep' = {
+  scope: resourceGroup(resourceGroup().name)
+  name: 'nodeAppIdentity'
+  params: {
+    basename: '${suffix}identity'
+    location: location
+  }
+}
+
+//create blob storage
 resource blobstore 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   name: storageAccountName
   location: location
@@ -32,8 +47,24 @@ resource blobstore 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   sku: {
     name: 'Standard_LRS'
   }
+  properties: {
+    allowBlobPublicAccess: false
+  }
 }
 
+//assign idenity with Storage Blob Data Contributor (ba92f5b4-2d11-453d-a403-e96b0029c9fe)
+var roleGuid = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+resource role_assignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, roleGuid)
+  properties: {
+    principalId: stgIdentity.outputs.principalId
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', roleGuid)
+    principalType: 'ServicePrincipal'
+  }
+  scope: blobstore
+}
+
+//create log analytics 
 resource logAnalyticsWorkspace'Microsoft.OperationalInsights/workspaces@2020-03-01-preview' = {
   name: logAnalyticsWorkspaceName
   location: location
@@ -48,6 +79,7 @@ resource logAnalyticsWorkspace'Microsoft.OperationalInsights/workspaces@2020-03-
   })
 }
 
+//create app insights
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
   location: location
@@ -58,6 +90,8 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+
+//create envb
 resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   name: environmentName
   location: location
@@ -72,6 +106,7 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
     }
   }
   
+  //attach dapr component
   resource daprComponent 'daprComponents@2022-01-01-preview' = {
     name: 'statestore'
     properties: {
@@ -98,6 +133,10 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
           name: 'accountKey'
           secretRef: 'storageaccountkey'
         }
+        {
+          name: 'azureClientId'
+          value: stgIdentity.outputs.clientId
+        }
       ]
       scopes: [
         'nodeapp'
@@ -106,6 +145,7 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   }
 }
 
+//create keyvault
 resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyvaultName
   location: location
@@ -193,7 +233,7 @@ resource kvAcrPassword  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
     value: acr.listCredentials().passwords[0].value
   }
 }
-// @description('Container Registry admin password')
+@description('Container Registry admin password')
 output acrPassword string = acr.listCredentials().passwords[0].value
 
 resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
@@ -203,5 +243,7 @@ resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
     value: acr.properties.loginServer
   }
 }
-// @description('Container Registry login server')
+@description('Container Registry login server')
 output acrloginServer string = acr.properties.loginServer
+
+output identityId string = stgIdentity.outputs.identityid 

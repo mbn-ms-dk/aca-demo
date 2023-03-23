@@ -23,10 +23,16 @@ param registry_password string
 @description('Provide a location for the Container Apps resources')
 param location string
 
-resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
+@description('the assigned identity')
+param identity object
+
+resource nodeapp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: 'nodeapp'
   location: location
-
+  identity: {
+    type: 'UserAssigned'
+     userAssignedIdentities: identity
+  }
   properties: {
     managedEnvironmentId: resourceId('Microsoft.App/managedEnvironments', environment_name)
 
@@ -35,7 +41,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
         external: true
         targetPort: 3000
       }
-
+      
       activeRevisionsMode: 'multiple'
 
       dapr: {
@@ -62,7 +68,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-01-01-preview' = {
     }
 
     template: {
-      revisionSuffix: 'rev${revVersion}'
+      revisionSuffix: revVersion
       containers: [
         {
           image: '${registry_login_server}/hello-aca-node:v1'

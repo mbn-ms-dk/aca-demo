@@ -1,7 +1,15 @@
-// ------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-// ------------------------------------------------------------
+//
+// Copyright 2021 The Dapr Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//     http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -11,41 +19,29 @@ const app = express();
 app.use(bodyParser.json());
 
 // These ports are injected automatically into the container.
-const daprPort = process.env.DAPR_HTTP_PORT; 
-const daprGRPCPort = process.env.DAPR_GRPC_PORT;
-const message = process.env.MESSAGE || 'Default';
-const persistOrders = process.env.PERSIST_ORDERS || 'true';
+const daprPort = process.env.DAPR_HTTP_PORT ?? "3500"; 
+const daprGRPCPort = process.env.DAPR_GRPC_PORT ?? "50001";
 
 const stateStoreName = `statestore`;
 const stateUrl = `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`;
-const port = 3000;
+const port = process.env.APP_PORT ?? "3000";
 
-app.get('/order', (_req, res) => {
-    if (persistOrders == 'false') {
-        console.log("Persistence not enabled -- returning stubbed result.");
-
-        orderId = Math.floor(Math.random() * 100) + 1;
-
-        res.send({"orderId": orderId});
-        return;
+app.get('/order', async (_req, res) => {
+    try {
+        const response = await fetch(`${stateUrl}/order`);
+        if (!response.ok) {
+            throw "Could not get state.";
+        }
+        const orders = await response.text();
+        res.send(orders);
     }
-
-    fetch(`${stateUrl}/order`)
-        .then((response) => {
-            if (!response.ok) {
-                throw "Could not get state.";
-            }
-
-            return response.text();
-        }).then((orders) => {
-            res.send(orders);
-        }).catch((error) => {
-            console.log(error);
-            res.status(500).send({message: error});
-        });
+    catch (error) {
+        console.log(error);
+        res.status(500).send({message: error});
+    }
 });
 
-app.post('/neworder', (req, res) => {
+app.post('/neworder', async (req, res) => {
     const data = req.body.data;
     const orderId = data.orderId;
     console.log("Got a new order! Order ID: " + orderId);
@@ -55,36 +51,29 @@ app.post('/neworder', (req, res) => {
         value: data
     }];
 
-    if (persistOrders == 'false') {
-        console.log(`Successfully persisted state by ${message} (stubbed)`);
-        res.status(200).send();
-        return;
-    }
-
-    fetch(stateUrl, {
-        method: "POST",
-        body: JSON.stringify(state),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then((response) => {
+    try {
+        const response = await fetch(stateUrl, {
+            method: "POST",
+            body: JSON.stringify(state),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
         if (!response.ok) {
             throw "Failed to persist state.";
         }
-
-        console.log(`Successfully persisted state by ${message}`);
+        console.log("Successfully persisted state for Order ID: " + orderId);
         res.status(200).send();
-    }).catch((error) => {
+    } catch (error) {
         console.log(error);
         res.status(500).send({message: error});
-    });
+    }
 });
 
 app.get('/ports', (_req, res) => {
     console.log("DAPR_HTTP_PORT: " + daprPort);
     console.log("DAPR_GRPC_PORT: " + daprGRPCPort);
-    console.log("Version: " + message);
-    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort, Version: message })
+    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort })
 });
 
 app.listen(port, () => console.log(`Node App listening on port ${port}!`));
