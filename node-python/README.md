@@ -47,6 +47,7 @@ ACR_PASSWORD=$(echo $DEPLOY_OUTPUTS | jq -r .acrPassword.value)
 ACR_LOGIN_SERVER=$(echo $DEPLOY_OUTPUTS | jq -r .acrloginServer.value)
 ACR_NAME=$(echo $ACR_LOGIN_SERVER | cut -f1,1 -d .)
 WORKSPACE_CLIENT_ID=$(echo $DEPLOY_OUTPUTS | jq -r .workspaceId.value)
+IDENTITY_ID=$(echo $DEPLOY_OUTPUTS | jq -r .identityId.value)
 ```
 
 Create new container images (for displaying a custom message with the the app version)
@@ -78,8 +79,9 @@ az deployment group create \
   --name nodeapp-v1 \
   -g $RESOURCE_GROUP \
   --template-file ./deployNodeApp.bicep \
-  --parameters kvName=<Keyvault_name> \
+  --parameters kvName=kvoau3y \
     location=westeurope \ 
+    identity=$IDENTITY_ID \
     nodeAppVersion='1'
 
 # Or via CLI
@@ -88,6 +90,7 @@ az containerapp create \
   --container-name nodeapp \
   --revisions-mode multiple \
   --resource-group $RESOURCE_GROUP \
+  --user-assigned $IDENTITY_ID \
   --environment $CONTAINERAPPS_ENVIRONMENT \
   --image $ACR_LOGIN_SERVER/hello-aca-node:v1 \
   --registry-server $ACR_LOGIN_SERVER \
@@ -105,6 +108,28 @@ az containerapp create \
   --dapr-app-id nodeapp \
   --dapr-app-protocol http
 
+  # or
+  az containerapp create \
+  --name nodeapp \
+  --revisions-mode multiple \
+  --resource-group $RESOURCE_GROUP \
+  --user-assigned $IDENTITY_ID \
+  --environment $CONTAINERAPPS_ENVIRONMENT \
+  --image $ACR_LOGIN_SERVER/hello-aca-node:v1 \
+  --registry-server $ACR_LOGIN_SERVER \
+  --registry-username $ACR_USERNAME \
+  --registry-password $ACR_PASSWORD \
+  --ingress external \
+  --target-port 3000 \
+  --env-vars MESSAGE=v1 \
+  --min-replicas 1 \
+  --max-replicas 1 \
+  --enable-dapr \
+  --dapr-app-id nodeapp \
+  --dapr-app-port 3000 \
+  --env-vars 'APP_PORT=3000'
+# verify identity attach
+az containerapp identity show --name 'nodeapp' --resource-group $RESOURCE_GROUP
 az containerapp list -o table
 az containerapp revision list -n nodeapp -g $RESOURCE_GROUP -o table
 ```
@@ -143,7 +168,7 @@ az containerapp create \
   --dapr-app-id pythonapp \
   --dapr-app-protocol http
 
-# Append paraemter `nodeapp_url` if not using Dapr for service discovery
+# Append parameter `nodeapp_url` if not using Dapr for service discovery
 # nodeapp_url=$NODEAPP_INGRESS_URL/neworder
 
 az containerapp list -o table
