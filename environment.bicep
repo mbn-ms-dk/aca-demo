@@ -11,7 +11,7 @@ var appInsightsName = 'appins-${environmentName}'
 var acrName = 'acr${suffix}'
 var storageAccountName = 'storage${suffix}'
 var storageContainerName = 'orders'
-var keyvaultName = 'kv${suffix}'
+var keyvaultName = 'kv${suffix}${take(uniqueString(resourceGroup().id,suffix), 3)}'
 var tenantId = subscription().tenantId
 
 //Create ACR
@@ -30,11 +30,12 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-08-01-preview' = {
 output acrname string = acr.name
 
 //Create identity
+//needed if allowBlobPublicAccess is set to false on the Storage Account
 module stgIdentity 'modules/userassigned.bicep' = {
   scope: resourceGroup(resourceGroup().name)
   name: 'nodeAppIdentity'
   params: {
-    basename: '${suffix}identity'
+    basename: suffix
     location: location
   }
 }
@@ -53,6 +54,7 @@ resource blobstore 'Microsoft.Storage/storageAccounts@2021-06-01' = {
 }
 
 //assign idenity with Storage Blob Data Contributor (ba92f5b4-2d11-453d-a403-e96b0029c9fe)
+//needed if allowBlobPublicAccess is set to false on the Storage Account
 var roleGuid = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 resource role_assignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, roleGuid)
@@ -91,7 +93,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 
-//create envb
+//create env
 resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   name: environmentName
   location: location
@@ -134,6 +136,7 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
           secretRef: 'storageaccountkey'
         }
         {
+          //needed if allowBlobPublicAccess is set to false on the Storage Account
           name: 'azureClientId'
           value: stgIdentity.outputs.clientId
         }
@@ -210,8 +213,9 @@ resource kvLaId 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
     value: logAnalyticsWorkspace.properties.customerId
   }
 }  
-// @description('Log Analytics workspace ID')
-// output workspaceId string = logAnalyticsWorkspace.properties.customerId
+
+@description('Log Analytics workspace ID')
+output workspaceId string = logAnalyticsWorkspace.properties.customerId
 
 // Container Registry admin username
 resource kvAcrUserName  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
@@ -247,3 +251,4 @@ resource kvAcrloginServer  'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 output acrloginServer string = acr.properties.loginServer
 
 output identityId string = stgIdentity.outputs.identityid 
+output kvName string = keyvault.name

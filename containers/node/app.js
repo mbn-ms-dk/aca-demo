@@ -30,7 +30,7 @@ app.get('/order', async (_req, res) => {
     try {
         const response = await fetch(`${stateUrl}/order`);
         if (!response.ok) {
-            throw "Could not get state.";
+            throw "Version" + process.env.MESSAGE +" Could not get state.";
         }
         const orders = await response.text();
         res.send(orders);
@@ -44,7 +44,7 @@ app.get('/order', async (_req, res) => {
 app.post('/neworder', async (req, res) => {
     const data = req.body.data;
     const orderId = data.orderId;
-    console.log("Got a new order! Order ID: " + orderId);
+    console.log("Version" + process.env.MESSAGE +" Got a new order! Order ID: " + orderId);
 
     const state = [{
         key: "order",
@@ -60,9 +60,9 @@ app.post('/neworder', async (req, res) => {
             }
         });
         if (!response.ok) {
-            throw "Failed to persist state.";
+            throw "Version" + process.env.MESSAGE +" Failed to persist state.";
         }
-        console.log("Successfully persisted state for Order ID: " + orderId);
+        console.log("Version" + process.env.MESSAGE +" Successfully persisted state for Order ID: " + orderId);
         res.status(200).send();
     } catch (error) {
         console.log(error);
@@ -73,7 +73,7 @@ app.post('/neworder', async (req, res) => {
 app.get('/ports', (_req, res) => {
     console.log("DAPR_HTTP_PORT: " + daprPort);
     console.log("DAPR_GRPC_PORT: " + daprGRPCPort);
-    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort })
+    res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort, MESSAGE: process.env.MESSAGE })
 });
 
 app.listen(port, () => console.log(`Node App listening on port ${port}!`));

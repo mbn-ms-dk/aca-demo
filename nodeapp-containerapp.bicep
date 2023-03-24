@@ -71,7 +71,7 @@ resource nodeapp 'Microsoft.App/containerApps@2022-06-01-preview' = {
       revisionSuffix: revVersion
       containers: [
         {
-          image: '${registry_login_server}/hello-aca-node:v1'
+          image: '${registry_login_server}/hello-aca-node:${revVersion}'
           name: 'nodeapp'
           env: [
             {

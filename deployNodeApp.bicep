@@ -5,7 +5,7 @@ param location string
 @description('Version')
 param nodeAppVersion string
 @description('the assigned identity')
-param identity string
+param identityId string
 
 resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: kvName
@@ -18,7 +18,7 @@ module nodeappModule1 'nodeapp-containerapp.bicep' =  {
   params: {
     location: location
     identity: {
-      '${identity}' : {}
+      '${identityId}' : {}
     }
     environment_name: keyvault.getSecret('kvEnvName')
     custom_message: 'Version:v${nodeAppVersion}'
